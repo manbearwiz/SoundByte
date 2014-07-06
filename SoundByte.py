@@ -19,8 +19,10 @@ for f in favorite_tracks:
 
     sound_url = 'http://media.soundcloud.com/stream/{0}'.format(id)
 
+    title = '{artist} - {title}.mp3'.format(artist=f.user['username'], title=f.title)
+
+    print('Downloading "{title}" from "{url}"...'.format(title=title, url=sound_url))
+
     urllib.request.urlretrieve(sound_url, '{0}.mp3'.format(id))
 
-    print(match.group(1))
-
-    print(f.title + " " + f.waveform_url)
+    print('Download complete!')
