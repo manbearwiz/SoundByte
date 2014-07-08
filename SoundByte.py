@@ -20,23 +20,21 @@ with open(RECORD_FILE) as f:
    
 already_downloaded = set([int(x.rstrip()) for x in already_downloaded])
 
-favorite_tracks = client.get('/users/{0}/favorites'.format(user.id), limit=300)
+favorite_sounds = client.get('/users/{0}/favorites'.format(user.id), limit=300)
 
-tracks_to_download = [x for x in favorite_tracks if x.id not in already_downloaded]
+sounds_to_download = [x for x in favorite_sounds if x.id not in already_downloaded]
 
-print("Found {numtracks} favorite tracks you have yet to download.".format(numtracks=len(tracks_to_download)))
+print("Found {numtracks} favorite tracks you have yet to download.".format(numtracks=len(sounds_to_download)))
 
 with open(RECORD_FILE, 'a') as output_file:
-    for f in tracks_to_download:
-        match = re.match('https://[^/]*/(.*)_m.png', f.waveform_url)
-        
-        id = match.group(1)
-    
-        sound_url = 'http://media.soundcloud.com/stream/{0}'.format(id)
+    for sound in sounds_to_download:
+        secret_id = re.match('https://[^/]*/(.*)_m.png', sound.waveform_url).group(1)
+
+        sound_url = 'http://media.soundcloud.com/stream/{secret_id}'.format(secret_id=secret_id)
 	
-        artist = f.user['username']
+        artist = sound.user['username']
     	
-        filename = '{artist} - {title}.mp3'.format(artist=artist, title=f.title)
+        filename = '{artist} - {title}.mp3'.format(artist=artist, title=sound.title)
     
         filename = re.sub('[^\w\-_\. \(\)\'\[\]\&\#]', ' - ', filename)
 		
@@ -47,6 +45,6 @@ with open(RECORD_FILE, 'a') as output_file:
         try:
             urllib.request.urlretrieve(sound_url, filename)
             print('Download complete!')
-            output_file.write('{song_id}\n'.format(song_id=f.id))
+            output_file.write('{song_id}\n'.format(song_id=sound.id))
         except HTTPError:
             print("I couldn't download the file ({url}). Now I'm sad.".format(url=sound_url))
