@@ -12,7 +12,6 @@ USERNAME = 'kevin-brey'
 
 client = soundcloud.Client(client_id=CLIENT_ID)
 
-
 user = client.get('/resolve', url='https://soundcloud.com/{username}'.format(username=USERNAME))
 
 with open(RECORD_FILE) as f:
@@ -20,7 +19,11 @@ with open(RECORD_FILE) as f:
    
 already_downloaded = set([int(x.rstrip()) for x in already_downloaded])
 
-favorite_tracks = client.get('/users/{0}/favorites'.format(user.id), limit=300)
+favorite_tracks = temp = client.get('/users/{0}/favorites'.format(user.id))
+
+while len(temp) > 0:
+    temp = client.get('/users/{0}/favorites'.format(user.id), offset=(len(favorite_tracks)))
+    favorite_tracks += temp
 
 tracks_to_download = [x for x in favorite_tracks if x.id not in already_downloaded]
 
